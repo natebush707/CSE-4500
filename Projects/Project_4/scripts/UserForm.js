@@ -1,3 +1,7 @@
+$("#btnUserClear").click(function () {
+    clearUserForm();
+})
+
 $("#frmUserForm").submit(function () {
     // Event: submitting the form
     saveUserForm();
@@ -28,4 +32,85 @@ function checkUserForm() {
         } else {
             return false;
         }
+}
+
+function showUserForm() {
+    // load the stored values in the form
+    try {
+        var user = JSON.parse(localStorage.getItem("user"));
+    } catch(e) {
+        // Google browsers use a different error constant
+        if (window.navigator.vendor==="Google Inc."){
+            if (e==DOMException.QUOTA_EXCEEDED_ERR){
+                alert("Error: Local Storage Limit Exceeded.");
+            }
+        }
+        else if (e==QUOTA_EXCEEDED_ERR){
+            alert("Error: Saving to Local Storage.")
+        }
+        console.log(e);
+    }
+
+    if (user != null) {
+        $("#txtFirstName").val(user.FirstName);
+        $("#txtLastName").val(user.LastName);
+        $("#txtHealthCardNumber").val(user.HealthCardNumber);
+        $("#changePassword").val(user.NewPassword);
+        $("#datBirthdate").val(user.DOB);
+        $("#slcCancerType option[value=" + user.CancerType + "]").attr("selected", "selected");
+        $("#slcCancerType option:selected").val(user.CancerType);
+        $("#slcCancerType").selectmenu("refresh", true);
+        $("#slcCancerStage option[value=" + user.CancerStage + "]").attr("selected", "selected");
+        $("#slcCancerStage option:selected").val(user.CancerStage);
+        $("#slcCancerStage").selectmenu("refresh", true);
+        $("#slcTSHRange option[value=" + user.TSHRange + "]").attr("selected", "selected");
+        $("#slcTSHRange option:selected").val(user.TSHRange);
+        $("#slcTSHRange").selectmenu("refresh", true);
+    }
+}
+
+function saveUserForm() {
+    if (checkUserForm()) {
+        var user = {
+            "FirstName": $("#txtFirstName").val(),
+            "LastName": $("#txtLastName").val(),
+            "HealthCardNumber": $("#txtHealthCardNumber").val(),
+            "NewPassword": $("#changePassword").val(),
+            "DOB": $("#datBirthdate").val(),
+            "CancerType": $("#slcCancerType option:selected").val(),
+            "CancerStage": $("#slcCancerStage option:selected").val(),
+            "TSHRange": $("#slcTSHRange option:selected").val()
+        };
+
+        try {
+            localStorage.setItem("user", JSON.stringify(user));
+            alert("Saving Information");
+
+            $.mobile.changePage("#pageMenu");
+            window.location.reload();
+        } catch(e) {
+            // Google browsers use different error constant
+            if (window.navigator.vendor === "Google Inc.") {
+                if (e == DOMException.QUOTA_EXCEEDED_ERR) {
+                    alert("Error: Local Storage Limit Exceeded.");
+                }
+            } else if (e == QUOTA_EXCEEDED_ERR) {
+                alert("Error: Saving to local storage.");
+            }
+            console.log(e)
+        }
+    } else {
+        alert("Please complete the form properly.");
+    }
+}
+
+function clearUserForm() {
+    localStorage.removeItem("user");
+    alert("The stored data have been removed");
+    $("#slcCancerStage").val("Select Cancer Stage");
+    $("#slcCancerStage").selectmenu("refresh", true);
+    $("#slcCancerType").val("Select Cancer Type");
+    $("#slcCancerType").selectmenu("refresh", true);
+    $("#slcTSHRange").val("Select TSH Range");
+    $("#slcTSHRange").selectmenu("refresh", true);
 }
